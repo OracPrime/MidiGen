@@ -1,6 +1,7 @@
 from midiutil import MIDIFile
 from midiutil.MidiFile import Text
 import struct
+import random
 
 # ---------------------------------------------------------------------------
 # Custom MIDI meta events for Reaper markers & lyrics
@@ -111,9 +112,106 @@ CHORDS = {
 }
 
 def add_chord(midi_obj, chord_name, start_time, duration_beats):
+    """Legacy block-chord (no strum). Kept for reference."""
     notes = CHORDS[chord_name]
     for note in notes:
         midi_obj.addNote(track, channel, note, start_time, duration_beats, volume)
+
+
+# ---------------------------------------------------------------------------
+# STRUM ENGINE — realistic guitar feel for SampleTank
+# ---------------------------------------------------------------------------
+# Strum offset per string in beats (at 90 BPM, 1 beat = 667ms, so 0.012 ≈ 8ms)
+STRUM_SPREAD   = 0.012   # time between each string hit (beats)
+BASE_VELOCITY  = 90      # centre velocity for strums
+HUMANIZE_TIME  = 0.006   # random timing jitter per note (beats)
+HUMANIZE_VEL   = 12      # random velocity jitter (+/-)
+
+def strum_chord(midi_obj, chord_name, start_time, duration_beats,
+                direction='down', velocity=None, muted=False):
+    """Add a strummed chord with per-string offset and velocity shaping.
+
+    direction: 'down' = low→high, 'up' = high→low
+    velocity:  override base velocity (useful for accents / ghost strums)
+    muted:     short duration for percussive muted strums
+    """
+    notes = CHORDS[chord_name]
+    if direction == 'up':
+        notes = list(reversed(notes))
+
+    vel = velocity or BASE_VELOCITY
+    note_dur = 0.08 if muted else duration_beats  # muted = very short
+
+    for i, note in enumerate(notes):
+        # Stagger each string
+        t = start_time + i * STRUM_SPREAD
+        # Humanize timing slightly
+        t += random.uniform(-HUMANIZE_TIME, HUMANIZE_TIME)
+        # Velocity: first string loudest on downstroke, shape across strings
+        if direction == 'down':
+            v = vel - i * 3            # bass strings a bit louder
+        else:
+            v = vel - (len(notes) - 1 - i) * 3  # treble strings louder on up
+        v += random.randint(-HUMANIZE_VEL, HUMANIZE_VEL)
+        v = max(30, min(127, v))       # clamp to MIDI range
+
+        midi_obj.addNote(track, channel, note, max(0, t), note_dur, v)
+
+
+# ---------------------------------------------------------------------------
+# STRUM PATTERNS — define rhythmic patterns per section style
+# ---------------------------------------------------------------------------
+# Each entry: (beat_offset, direction, velocity_scale, is_muted)
+# Velocity scale is multiplied by BASE_VELOCITY.
+
+# Verse: gentle fingerpick / soft strum — "Hurt" is very sparse
+VERSE_STRUM = [
+    (0.0,  'down', 0.75, False),    # beat 1 — soft down
+    (1.5,  'up',   0.55, False),    # & of 2 — ghost up
+    (2.0,  'down', 0.65, False),    # beat 3 — medium down
+    (3.0,  'up',   0.50, False),    # beat 4 — light up
+]
+
+# Chorus: builds intensity
+CHORUS_STRUM = [
+    (0.0,  'down', 0.90, False),    # beat 1 — accent
+    (1.0,  'down', 0.60, False),    # beat 2 — lighter
+    (1.5,  'up',   0.55, False),    # & of 2
+    (2.0,  'down', 0.80, False),    # beat 3
+    (2.5,  'up',   0.50, False),    # & of 3
+    (3.0,  'down', 0.70, False),    # beat 4
+    (3.5,  'up',   0.55, False),    # & of 4
+]
+
+# Bridge: most intensity
+BRIDGE_STRUM = [
+    (0.0,  'down', 1.00, False),    # beat 1 — full accent
+    (0.5,  'up',   0.60, False),
+    (1.0,  'down', 0.85, False),
+    (1.5,  'up',   0.55, False),
+    (2.0,  'down', 0.90, False),
+    (2.5,  'up',   0.60, False),
+    (3.0,  'down', 0.80, False),
+    (3.5,  'up',   0.55, False),
+]
+
+# Intro / outro: very sparse, just a couple of gentle strums
+SPARSE_STRUM = [
+    (0.0,  'down', 0.60, False),
+    (2.0,  'down', 0.50, False),
+]
+
+def add_strummed_chord(midi_obj, chord_name, start_time, chord_duration,
+                        strum_pattern=None):
+    """Apply a strum pattern across the duration of one chord."""
+    pattern = strum_pattern or VERSE_STRUM
+    for beat_off, direction, vel_scale, muted in pattern:
+        if beat_off >= chord_duration:
+            continue  # skip strums that fall outside chord duration
+        vel = int(BASE_VELOCITY * vel_scale)
+        remaining = chord_duration - beat_off
+        strum_chord(midi_obj, chord_name, start_time + beat_off,
+                     remaining, direction, vel, muted)
 
 # Create the MIDIFile object
 MyMIDI = MIDIFile(1) 
@@ -128,10 +226,12 @@ MyMIDI.addTempo(track, time, tempo)
 # ---------------------------------------------------------
 current_beat = 0
 
-def play_section(pattern, num_bars, section_label=None, lyrics=None):
+def play_section(pattern, num_bars, section_label=None, lyrics=None,
+                  strum_pattern=None):
     """Play a chord pattern for num_bars repetitions.
     section_label — adds a Marker on Reaper's timeline at the section start.
     lyrics        — list of (bar_index, beat_offset, text) for lyric events.
+    strum_pattern — which strum rhythm to use (default: VERSE_STRUM).
     """
     global current_beat
     if section_label:
@@ -149,7 +249,8 @@ def play_section(pattern, num_bars, section_label=None, lyrics=None):
             key = (bar, beat_in_bar)
             if key in lyric_map:
                 add_lyric(MyMIDI, track, current_beat, lyric_map[key])
-            add_chord(MyMIDI, chord, current_beat, beats)
+            add_strummed_chord(MyMIDI, chord, current_beat, beats,
+                                strum_pattern)
             current_beat += beats
             beat_in_bar += beats
 
@@ -197,13 +298,13 @@ BRIDGE_LYRICS = [
 ]
 
 # BUILD THE SONG
-play_section(VERSE,  2, "Intro")
-play_section(VERSE,  4, "Verse 1",  VERSE1_LYRICS)
-play_section(CHORUS, 2, "Chorus 1", CHORUS1_LYRICS)
-play_section(VERSE,  4, "Verse 2",  VERSE2_LYRICS)
-play_section(CHORUS, 2, "Chorus 2", CHORUS2_LYRICS)
-play_section(BRIDGE, 2, "Bridge",   BRIDGE_LYRICS)
-play_section(VERSE,  2, "Outro")
+play_section(VERSE,  2, "Intro",    strum_pattern=SPARSE_STRUM)
+play_section(VERSE,  4, "Verse 1",  VERSE1_LYRICS,  VERSE_STRUM)
+play_section(CHORUS, 2, "Chorus 1", CHORUS1_LYRICS, CHORUS_STRUM)
+play_section(VERSE,  4, "Verse 2",  VERSE2_LYRICS,  VERSE_STRUM)
+play_section(CHORUS, 2, "Chorus 2", CHORUS2_LYRICS, CHORUS_STRUM)
+play_section(BRIDGE, 2, "Bridge",   BRIDGE_LYRICS,  BRIDGE_STRUM)
+play_section(VERSE,  2, "Outro",    strum_pattern=SPARSE_STRUM)
 
 # Save the file
 with open("Hurt_Sequence.mid", "wb") as output_file:
