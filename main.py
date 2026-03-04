@@ -311,3 +311,39 @@ with open("Hurt_Sequence.mid", "wb") as output_file:
     MyMIDI.writeFile(output_file)
 
 print("MIDI file 'Hurt_Sequence.mid' generated successfully!")
+
+# ---------------------------------------------------------
+# CHORD LABEL TRACK — empty MIDI with just markers & cue points
+# ---------------------------------------------------------
+ChordMIDI = MIDIFile(1)
+ChordMIDI.addTempo(0, 0, tempo)
+
+label_beat = 0
+
+def label_section(pattern, num_bars, section_label=None):
+    """Write chord labels and section markers only — no notes."""
+    global label_beat
+    if section_label:
+        add_marker(ChordMIDI, 0, label_beat, section_label)
+    for _ in range(num_bars):
+        for chord, beats in pattern:
+            add_cue(ChordMIDI, 0, label_beat, chord)
+            # Also add as text so it shows in the MIDI item in Reaper
+            ChordMIDI.addText(0, label_beat, chord)
+            label_beat += beats
+
+label_section(VERSE,  2, "Intro")
+label_section(VERSE,  4, "Verse 1")
+label_section(CHORUS, 2, "Chorus 1")
+label_section(VERSE,  4, "Verse 2")
+label_section(CHORUS, 2, "Chorus 2")
+label_section(BRIDGE, 2, "Bridge")
+label_section(VERSE,  2, "Outro")
+
+# Add an end-of-song marker so the MIDI extends to the full length
+add_marker(ChordMIDI, 0, label_beat, "END")
+
+with open("Hurt_Chords.mid", "wb") as output_file:
+    ChordMIDI.writeFile(output_file)
+
+print("MIDI file 'Hurt_Chords.mid' generated successfully!")
