@@ -263,10 +263,14 @@ BRIDGE  = [('Am', 4), ('F', 4), ('C', 4), ('Dsus2', 4)] # 16 beats (4 bars of 4/
 # LYRICS  (bar_index within section, beat_offset, text)
 # ---------------------------------------------------------
 VERSE1_LYRICS = [
-    (0, 0, "I hurt my-"),     (0, 2, "self to-"),   (0, 4, "day"),
-    (1, 0, "to see if"),      (1, 2, "I still"),    (1, 4, "feel"),
-    (2, 0, "I focus"),        (2, 2, "on the"),     (2, 4, "pain"),
+    (0, 0, "I hurt my-"),     (0, 2, "self to-"),    (0, 4, "day"),
+    (1, 0, "to see if"),      (1, 2, "I still"),     (1, 4, "feel"),
+    (2, 0, "I focus"),        (2, 2, "on the"),      (2, 4, "pain"),
     (3, 0, "the only"),       (3, 2, "thing that's"),(3, 4, "real"),
+    (4, 0, "The needle"),     (4, 2, "tears a"),     (4, 4, "hole"),
+    (5, 0, "the old fa-"),    (5, 2, "miliar"),      (5, 4, "sting"),
+    (6, 0, "Try to kill"),    (6, 2, "it all a-"),   (6, 4, "way"),
+    (7, 0, "but I re-"),     (7, 2, "member"),      (7, 4, "everything"),
 ]
 
 CHORUS1_LYRICS = [
@@ -277,10 +281,14 @@ CHORUS1_LYRICS = [
 ]
 
 VERSE2_LYRICS = [
-    (0, 0, "I wear this"),    (0, 2, "crown of"),   (0, 4, "thorns"),
-    (1, 0, "upon my"),        (1, 2, "liar's"),     (1, 4, "chair"),
-    (2, 0, "full of"),        (2, 2, "broken"),     (2, 4, "thoughts"),
-    (3, 0, "I cannot"),       (3, 2, "re-"),        (3, 4, "pair"),
+    (0, 0, "I wear this"),    (0, 2, "crown of"),    (0, 4, "thorns"),
+    (1, 0, "upon my"),        (1, 2, "liar's"),      (1, 4, "chair"),
+    (2, 0, "full of"),        (2, 2, "broken"),      (2, 4, "thoughts"),
+    (3, 0, "I cannot"),       (3, 2, "re-"),         (3, 4, "pair"),
+    (4, 0, "Beneath the"),    (4, 2, "stains of"),   (4, 4, "time"),
+    (5, 0, "the feelings"),   (5, 2, "dis-a-"),      (5, 4, "ppear"),
+    (6, 0, "You are"),        (6, 2, "someone"),     (6, 4, "else"),
+    (7, 0, "I am"),           (7, 2, "still right"), (7, 4, "here"),
 ]
 
 CHORUS2_LYRICS = [
@@ -299,12 +307,12 @@ BRIDGE_LYRICS = [
 
 # BUILD THE SONG
 play_section(VERSE,  2, "Intro",    strum_pattern=SPARSE_STRUM)
-play_section(VERSE,  4, "Verse 1",  VERSE1_LYRICS,  VERSE_STRUM)
+play_section(VERSE,  8, "Verse 1",  VERSE1_LYRICS,  VERSE_STRUM)
 play_section(CHORUS, 2, "Chorus 1", CHORUS1_LYRICS, CHORUS_STRUM)
-play_section(VERSE,  4, "Verse 2",  VERSE2_LYRICS,  VERSE_STRUM)
+play_section(VERSE,  8, "Verse 2",  VERSE2_LYRICS,  VERSE_STRUM)
 play_section(CHORUS, 2, "Chorus 2", CHORUS2_LYRICS, CHORUS_STRUM)
 play_section(BRIDGE, 2, "Bridge",   BRIDGE_LYRICS,  BRIDGE_STRUM)
-play_section(VERSE,  2, "Outro",    strum_pattern=SPARSE_STRUM)
+play_section(VERSE,  4, "Outro",    strum_pattern=SPARSE_STRUM)
 
 # Save the file
 with open("Hurt_Sequence.mid", "wb") as output_file:
@@ -333,12 +341,12 @@ def label_section(pattern, num_bars, section_label=None):
             label_beat += beats
 
 label_section(VERSE,  2, "Intro")
-label_section(VERSE,  4, "Verse 1")
+label_section(VERSE,  8, "Verse 1")
 label_section(CHORUS, 2, "Chorus 1")
-label_section(VERSE,  4, "Verse 2")
+label_section(VERSE,  8, "Verse 2")
 label_section(CHORUS, 2, "Chorus 2")
 label_section(BRIDGE, 2, "Bridge")
-label_section(VERSE,  2, "Outro")
+label_section(VERSE,  4, "Outro")
 
 # Add an end-of-song marker so the MIDI extends to the full length
 add_marker(ChordMIDI, 0, label_beat, "END")
