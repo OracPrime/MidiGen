@@ -278,6 +278,10 @@ CHORUS1_LYRICS = [
     (0, 8, "my sweetest"),      (0, 12, "friend?"),
     (1, 0, "Every-one I"),      (1, 4, "know"),
     (1, 8, "goes a-way"),       (1, 12, "in the end"),
+    (2, 0, "And you could"),    (2, 4, "have it"),
+    (2, 8, "all"),              (2, 12, "my empire of dirt"),
+    (3, 0, "I will let"),       (3, 4, "you"),
+    (3, 8, "down"),             (3, 12, "I will make you hurt"),
 ]
 
 VERSE2_LYRICS = [
@@ -292,10 +296,14 @@ VERSE2_LYRICS = [
 ]
 
 CHORUS2_LYRICS = [
-    (0, 0, "And you could"),  (0, 4, "have it"),
-    (0, 8, "all"),            (0, 12, "my empire of dirt"),
-    (1, 0, "I will let"),     (1, 4, "you"),
-    (1, 8, "down"),           (1, 12, "I will make you hurt"),
+    (0, 0, "What have I be-"),  (0, 4, "come"),
+    (0, 8, "my sweetest"),      (0, 12, "friend?"),
+    (1, 0, "Every-one I"),      (1, 4, "know"),
+    (1, 8, "goes a-way"),       (1, 12, "in the end"),
+    (2, 0, "And you could"),    (2, 4, "have it"),
+    (2, 8, "all"),              (2, 12, "my empire of dirt"),
+    (3, 0, "I will let"),       (3, 4, "you"),
+    (3, 8, "down"),             (3, 12, "I will make you hurt"),
 ]
 
 BRIDGE_LYRICS = [
@@ -308,9 +316,9 @@ BRIDGE_LYRICS = [
 # BUILD THE SONG
 play_section(VERSE,  2, "Intro",    strum_pattern=SPARSE_STRUM)
 play_section(VERSE,  8, "Verse 1",  VERSE1_LYRICS,  VERSE_STRUM)
-play_section(CHORUS, 2, "Chorus 1", CHORUS1_LYRICS, CHORUS_STRUM)
+play_section(CHORUS, 4, "Chorus 1", CHORUS1_LYRICS, CHORUS_STRUM)
 play_section(VERSE,  8, "Verse 2",  VERSE2_LYRICS,  VERSE_STRUM)
-play_section(CHORUS, 2, "Chorus 2", CHORUS2_LYRICS, CHORUS_STRUM)
+play_section(CHORUS, 4, "Chorus 2", CHORUS2_LYRICS, CHORUS_STRUM)
 play_section(BRIDGE, 2, "Bridge",   BRIDGE_LYRICS,  BRIDGE_STRUM)
 play_section(VERSE,  4, "Outro",    strum_pattern=SPARSE_STRUM)
 
@@ -342,9 +350,9 @@ def label_section(pattern, num_bars, section_label=None):
 
 label_section(VERSE,  2, "Intro")
 label_section(VERSE,  8, "Verse 1")
-label_section(CHORUS, 2, "Chorus 1")
+label_section(CHORUS, 4, "Chorus 1")
 label_section(VERSE,  8, "Verse 2")
-label_section(CHORUS, 2, "Chorus 2")
+label_section(CHORUS, 4, "Chorus 2")
 label_section(BRIDGE, 2, "Bridge")
 label_section(VERSE,  4, "Outro")
 
