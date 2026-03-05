@@ -168,7 +168,9 @@ def build_song(chords, sections, tempo, separate_chord_track=True,
                chords_file="output_chords.mid"):
     """Build MIDI files from a song definition.
 
-    chords  — dict mapping chord names to MIDI note lists
+    chords  — dict *or* list of dicts mapping chord names to MIDI note
+              lists.  When a list is given earlier dicts take priority;
+              later dicts only fill in keys not already present.
     sections — list of dicts:
         { 'pattern': [('chord', beats), ...],
           'repeats': int,
@@ -176,6 +178,11 @@ def build_song(chords, sections, tempo, separate_chord_track=True,
           'lyrics':  [(bar, beat_off, text), ...] or None,
           'strum':   strum pattern list }
     """
+    if isinstance(chords, (list, tuple)):
+        merged = {}
+        for d in reversed(chords):
+            merged.update(d)
+        chords = merged
     track   = 0
     channel = 0
 

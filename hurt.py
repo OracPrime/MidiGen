@@ -1,4 +1,4 @@
-from chords import CHORDS
+from chords import OPEN_CHORDS, BARRE_CHORDS, SPECIAL_CHORDS
 from midi_lib import (
     VERSE_STRUM, CHORUS_STRUM, BRIDGE_STRUM, SPARSE_STRUM,
     build_song,
@@ -85,12 +85,20 @@ SECTIONS = [
 
 def generate():
     build_song(
-        chords=CHORDS,
+        chords=[OPEN_CHORDS, SPECIAL_CHORDS],
         sections=SECTIONS,
         tempo=TEMPO,
         separate_chord_track=SEPARATE_CHORD_TRACK,
         sequence_file="Hurt_Sequence.mid",
         chords_file="Hurt_Chords.mid",
+    )
+    build_song(
+        chords=[BARRE_CHORDS, SPECIAL_CHORDS],
+        sections=SECTIONS,
+        tempo=TEMPO,
+        separate_chord_track=SEPARATE_CHORD_TRACK,
+        sequence_file="Hurt_Barre_Sequence.mid",
+        chords_file="Hurt_Barre_Chords.mid",
     )
 
 
