@@ -1,19 +1,12 @@
 from chords import OPEN_CHORDS, BARRE_CHORDS, SPECIAL_CHORDS
-from midi_lib import (
-    VERSE_STRUM, CHORUS_STRUM, BRIDGE_STRUM, SPARSE_STRUM,
-    build_song,
-)
+from strums import VERSE_STRUM, CHORUS_STRUM, BRIDGE_STRUM, SPARSE_STRUM
+from midi_lib import build_song
 
 # ---------------------------------------------------------
 # Nine Inch Nails — "Hurt"
 # ---------------------------------------------------------
 TEMPO = 90
 SEPARATE_CHORD_TRACK = True
-
-# -- Chord patterns (chord_name, duration in beats) --
-VERSE   = [('G', 2), ('A', 2), ('Em', 4)]               # 8 beats (2 bars of 4/4)
-CHORUS  = [('C', 4), ('G/B', 4), ('Am', 4), ('F', 4)]   # 16 beats (4 bars of 4/4)
-BRIDGE  = [('Am', 4), ('F', 4), ('C', 4), ('Dsus2', 4)] # 16 beats (4 bars of 4/4)
 
 # ---------------------------------------------------------
 # LYRICS  (bar_index within section, beat_offset, text)
@@ -29,7 +22,7 @@ VERSE1_LYRICS = [
     (7, 0, "but I re-"),      (7, 2, "member"),      (7, 4, "everything"),
 ]
 
-CHORUS1_LYRICS = [
+CHORUS_LYRICS = [
     (0, 0, "What have I be-"),  (0, 4, "come"),
     (0, 8, "my sweetest"),      (0, 12, "friend?"),
     (1, 0, "Every-one I"),      (1, 4, "know"),
@@ -51,17 +44,6 @@ VERSE2_LYRICS = [
     (7, 0, "I am"),           (7, 2, "still right"), (7, 4, "here"),
 ]
 
-CHORUS2_LYRICS = [
-    (0, 0, "What have I be-"),  (0, 4, "come"),
-    (0, 8, "my sweetest"),      (0, 12, "friend?"),
-    (1, 0, "Every-one I"),      (1, 4, "know"),
-    (1, 8, "goes a-way"),       (1, 12, "in the end"),
-    (2, 0, "And you could"),    (2, 4, "have it"),
-    (2, 8, "all"),              (2, 12, "my empire of dirt"),
-    (3, 0, "I will let"),       (3, 4, "you"),
-    (3, 8, "down"),             (3, 12, "I will make you hurt"),
-]
-
 BRIDGE_LYRICS = [
     (0, 0, "If I could"),     (0, 4, "start a-"),
     (0, 8, "gain"),           (0, 12, "a million"),
@@ -69,15 +51,21 @@ BRIDGE_LYRICS = [
     (1, 8, "I would"),        (1, 12, "keep myself"),
 ]
 
+# -- Chord patterns (chord_name, duration in beats) --
+VERSE   = [('G', 2), ('A', 2), ('Em', 4)]               # 8 beats (2 bars of 4/4)
+CHORUS  = [('C', 4), ('G/B', 4), ('Am', 4), ('F', 4)]   # 16 beats (4 bars of 4/4)
+BRIDGE  = [('Am', 4), ('F', 4), ('C', 4), ('Dsus2', 4)] # 16 beats (4 bars of 4/4)
+
 # ---------------------------------------------------------
 # SONG STRUCTURE
 # ---------------------------------------------------------
+
 SECTIONS = [
     {'pattern': VERSE,  'repeats': 2, 'label': 'Intro',    'strum': SPARSE_STRUM},
     {'pattern': VERSE,  'repeats': 8, 'label': 'Verse 1',  'strum': VERSE_STRUM,  'lyrics': VERSE1_LYRICS},
-    {'pattern': CHORUS, 'repeats': 4, 'label': 'Chorus 1', 'strum': CHORUS_STRUM, 'lyrics': CHORUS1_LYRICS},
+    {'pattern': CHORUS, 'repeats': 4, 'label': 'Chorus 1', 'strum': CHORUS_STRUM, 'lyrics': CHORUS_LYRICS},
     {'pattern': VERSE,  'repeats': 8, 'label': 'Verse 2',  'strum': VERSE_STRUM,  'lyrics': VERSE2_LYRICS},
-    {'pattern': CHORUS, 'repeats': 4, 'label': 'Chorus 2', 'strum': CHORUS_STRUM, 'lyrics': CHORUS2_LYRICS},
+    {'pattern': CHORUS, 'repeats': 4, 'label': 'Chorus 2', 'strum': CHORUS_STRUM, 'lyrics': CHORUS_LYRICS},
     {'pattern': BRIDGE, 'repeats': 2, 'label': 'Bridge',   'strum': BRIDGE_STRUM, 'lyrics': BRIDGE_LYRICS},
     {'pattern': VERSE,  'repeats': 4, 'label': 'Outro',    'strum': SPARSE_STRUM},
 ]
