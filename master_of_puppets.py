@@ -150,40 +150,31 @@ def _rhythm_intro(midi, t, ch, beat):
     return beat + INTRO_BARS * 4
 
 def _rhythm_main_riff(midi, t, ch, beat, bars, vel_base=100):
-    """Main riff: E5 gallop pattern — down-down-up palm muted chugging
-    with chromatic walk-downs.
+    """Main riff: E5 gallop pattern — downpicked 8th-note palm-muted
+    chugging with chromatic walk-downs.
 
-    The iconic pattern per bar:
-      beat 1: PM chord, beat 1+: PM, beat 1.5: PM
-      beat 2: PM, 2+: PM, 2.5: PM
-      beat 3: open chord hit or walk-down note
-      beat 4: PM PM PM (gallop)
+    The iconic pattern per bar (8th-note grid, 0.5-beat spacing):
+      beats 1–2:   PM 8th-note chugging on E5
+      beat  2.5–3:  chromatic walk-down (F5 etc.)
+      beats 3–4:   PM 8th-note chugging on E5
     """
     riff_sequence = [
         # (chord, is_palm_muted, beat_offset, duration, velocity_scale)
-        # Bar pattern A (E5 gallop)
-        (E5, True,  0.0,   0.08, 1.0),
-        (E5, True,  0.25,  0.08, 0.85),
-        (E5, True,  0.5,   0.08, 0.9),
-        (E5, True,  0.75,  0.08, 0.8),
-        (E5, True,  1.0,   0.08, 0.95),
-        (E5, True,  1.25,  0.08, 0.8),
-        (E5, True,  1.5,   0.08, 0.9),
-        (E5, True,  1.75,  0.08, 0.75),
-        (E5, False, 2.0,   0.5,  1.0),    # open hit
-        (F5, True,  2.5,   0.08, 0.85),
-        (F5, True,  2.75,  0.08, 0.8),
-        (E5, True,  3.0,   0.08, 0.95),
-        (E5, True,  3.25,  0.08, 0.8),
-        (E5, True,  3.5,   0.08, 0.9),
-        (E5, True,  3.75,  0.08, 0.75),
+        # Bar pattern A — downpicked 8th notes
+        (E5, True,  0.0,  0.08, 1.0),
+        (E5, True,  0.5,  0.08, 0.9),
+        (E5, True,  1.0,  0.08, 0.95),
+        (E5, True,  1.5,  0.08, 0.85),
+        (E5, False, 2.0,  0.5,  1.0),     # open hit
+        (F5, True,  2.5,  0.08, 0.85),
+        (E5, True,  3.0,  0.08, 0.95),
+        (E5, True,  3.5,  0.08, 0.9),
     ]
 
     # Alternate every other bar with a slight variation (walk to F5/G5)
     riff_sequence_b = list(riff_sequence)
-    riff_sequence_b[8] = (G5, False, 2.0, 0.5, 1.0)
-    riff_sequence_b[9] = (F5s, True, 2.5, 0.08, 0.85)
-    riff_sequence_b[10] = (F5, True, 2.75, 0.08, 0.8)
+    riff_sequence_b[4] = (G5, False, 2.0, 0.5, 1.0)
+    riff_sequence_b[5] = (F5s, True, 2.5, 0.08, 0.85)
 
     for bar in range(bars):
         b = beat + bar * 4
@@ -198,26 +189,26 @@ def _rhythm_main_riff(midi, t, ch, beat, bars, vel_base=100):
 
 def _rhythm_verse(midi, t, ch, beat, bars, vel_base=95):
     """Verse riff: similar to main riff but slightly pulled back dynamically.
-    Tighter palm muting, mostly E5 with chromatic neighbor tones."""
+    Tight downpicked 8th-note palm muting, mostly E5 with chromatic neighbor tones."""
     for bar in range(bars):
         b = beat + bar * 4
-        # Tight 16th-note palm-muted chugging on E5
-        for sixteenth in range(16):
-            off = sixteenth * 0.25
-            # Accent pattern: 1, &-of-2, 3, &-of-4
-            if sixteenth in (0, 5, 8, 13):
+        # Downpicked 8th-note palm-muted chugging on E5
+        for eighth in range(8):
+            off = eighth * 0.5
+            # Accent pattern: downbeats and &-of-2, &-of-4
+            if eighth in (0, 3, 6):
                 v = int(vel_base * 1.0)
-            elif sixteenth % 2 == 0:
+            elif eighth % 2 == 0:
                 v = int(vel_base * 0.85)
             else:
                 v = int(vel_base * 0.7)
 
             # Walk-down on beats 3-4 of every other bar
-            if bar % 2 == 1 and sixteenth >= 12:
-                chord = [F5, F5, E5, E5][sixteenth - 12]
-            elif bar % 4 == 3 and sixteenth >= 8:
-                walk = [G5, F5s, F5, E5, G5, F5s, F5, E5]
-                chord = walk[sixteenth - 8]
+            if bar % 2 == 1 and eighth >= 6:
+                chord = [F5, E5][eighth - 6]
+            elif bar % 4 == 3 and eighth >= 4:
+                walk = [G5, F5s, F5, E5]
+                chord = walk[eighth - 4]
             else:
                 chord = E5
             add_pm_chord(midi, t, ch, chord, b + off, v)
